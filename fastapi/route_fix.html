@@ -1,0 +1,30 @@
+<html style="margin:0;padding:0;">
+<div style="background-color:transparent;box-sizing:border-box;font-family:'Roboto','PingFang SC','Segoe UI',Arial,sans-serif;color:#1A1B1C;padding:4px 0;max-width:680px;">
+
+  <div style="font-size:15px;font-weight:600;margin:0 0 10px 0;">路线编排修复效果：同一天同一个行程诉求</div>
+
+  <!-- 修复前 -->
+  <div style="margin-bottom:10px;">
+    <div style="font-size:12px;font-weight:600;color:#6B7280;margin-bottom:5px;">修复前（用户测试）— 3 处硬伤</div>
+    <div style="font-size:12px;line-height:1.8;">
+      <div style="padding:6px 10px;background:rgba(234,102,104,0.08);border:1px solid rgba(234,102,104,0.25);border-radius:8px;margin-bottom:4px;">09:00 早餐　<b>08:30 英歌舞</b> → 时间乱序，且上午根本看不到演出</div>
+      <div style="padding:6px 10px;background:rgba(234,102,104,0.08);border:1px solid rgba(234,102,104,0.25);border-radius:8px;margin-bottom:4px;">09:35 南生百货 → 10:00 才开门，白跑（只提示不修正）</div>
+      <div style="padding:6px 10px;background:rgba(234,102,104,0.08);border:1px solid rgba(234,102,104,0.25);border-radius:8px;">10:10/10:55 侨批馆、开埠馆 → 周一闭馆只提示，不换天</div>
+    </div>
+  </div>
+
+  <!-- 修复后 -->
+  <div>
+    <div style="font-size:12px;font-weight:600;color:#6B7280;margin-bottom:5px;">修复后（周六模拟，plan_route 单测输出）— 编排自动校正</div>
+    <div style="font-size:12px;line-height:1.8;">
+      <div style="padding:6px 10px;background:rgba(82,196,26,0.08);border:1px solid rgba(82,196,26,0.25);border-radius:8px;margin-bottom:4px;">08:30~10:00 空档 → 留给早餐/逛街（prompt 只允许非景点项放开头/结尾）</div>
+      <div style="padding:6px 10px;background:rgba(82,196,26,0.08);border:1px solid rgba(82,196,26,0.25);border-radius:8px;margin-bottom:4px;">10:00-11:00 南生百货 → 早于开门自动顺延到开门时间</div>
+      <div style="padding:6px 10px;background:rgba(82,196,26,0.08);border:1px solid rgba(82,196,26,0.25);border-radius:8px;margin-bottom:4px;">11:05-12:05 侨批文物馆 → 周一闭馆提示保留（换到非周一自动无此提示）</div>
+      <div style="padding:6px 10px;background:rgba(82,196,26,0.08);border:1px solid rgba(82,196,26,0.25);border-radius:8px;margin-bottom:4px;">12:10-13:10 开埠文化陈列馆</div>
+      <div style="padding:6px 10px;background:rgba(148,216,195,0.15);border:1px solid rgba(82,196,26,0.35);border-radius:8px;">15:00-16:30 英歌舞 → 演出日自动排到演出窗口；非演出日则 warning「今日无演出，不建议硬排」</div>
+    </div>
+  </div>
+
+  <div style="font-size:11px;color:#6B7280;margin-top:12px;line-height:1.6;">数据来源：route_tools._schedule_spots 纯函数单测（模拟景点，未连 neo4j）。LLM 输出端（升序、非演出日移除）需真实调用 DeepSeek 验证。</div>
+</div>
+</html>

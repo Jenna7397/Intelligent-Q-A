@@ -1,0 +1,11 @@
+# API 服务
+fastapi==0.141.1
+uvicorn==0.53.0
+pydantic==2.13.5
+python-dotenv==1.2.3
+requests==2.34.2
+
+# 知识库（RAG）
+fastembed==0.8.0
+onnxruntime==1.19.2
+numpy==1.26.4

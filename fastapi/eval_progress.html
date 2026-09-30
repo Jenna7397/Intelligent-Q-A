@@ -1,0 +1,34 @@
+<html style="margin:0;padding:0;">
+<div style="background-color:transparent;box-sizing:border-box;font-family:'Roboto','PingFang SC','Segoe UI',Arial,sans-serif;color:#1A1B1C;padding:4px 0;max-width:640px;">
+  <div style="font-size:15px;font-weight:600;margin:0 0 12px 0;color:#1A1B1C;">评测指标演进：三次检索方案对比</div>
+
+  <div style="display:flex;gap:16px;flex-wrap:wrap;box-sizing:border-box;margin-bottom:14px;">
+    <div style="flex:1 1 150px;min-width:0;padding:10px 12px;background:linear-gradient(135deg,rgba(158,172,234,0.10),rgba(158,172,234,0.28));border-radius:12px;box-sizing:border-box;">
+      <div style="font-size:11.5px;color:#6B7280;">方案一 纯向量（ChromaDB）</div>
+      <div style="font-size:18px;font-weight:600;margin-top:3px;">@1=94.0%</div>
+      <div style="font-size:11px;color:#6B7280;margin-top:2px;">@5=94.5% · MRR=0.942<br/>失败 41/686 条</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:0;padding:10px 12px;background:linear-gradient(135deg,rgba(139,200,234,0.12),rgba(139,200,234,0.30));border-radius:12px;box-sizing:border-box;">
+      <div style="font-size:11.5px;color:#6B7280;">方案二 混合检索（向量+BM25+RRF）</div>
+      <div style="font-size:18px;font-weight:600;margin-top:3px;">@1=95.2%</div>
+      <div style="font-size:11px;color:#6B7280;margin-top:2px;">@5=99.7% · MRR=0.969<br/>失败 33/686 条</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:0;padding:10px 12px;background:linear-gradient(135deg,rgba(148,216,195,0.14),rgba(148,216,195,0.34));border-radius:12px;box-sizing:border-box;">
+      <div style="font-size:11.5px;color:#6B7280;">方案三 混合检索 + 数据治理 + HNSW 修复</div>
+      <div style="font-size:18px;font-weight:600;margin-top:3px;color:#1A1B1C;">@1=96.5%</div>
+      <div style="font-size:11px;color:#6B7280;margin-top:2px;">@5=100% · MRR=0.978<br/>失败 23/648 条</div>
+    </div>
+  </div>
+
+  <div style="font-size:11px;color:#6B7280;line-height:1.6;margin-bottom:14px;">口径：方案一/二为 686 条评测（侨批用完整长标题提问）；方案三为 648 条（侨批改用短实体名提问，更贴近真实问法）。失败=期望实体未进 top5 或非首位。</div>
+
+  <div style="font-size:13.5px;font-weight:600;margin:0 0 8px 0;">三处关键改动（本轮）</div>
+  <div style="font-size:13px;line-height:1.7;color:#1A1B1C;">
+    <div style="padding:8px 12px;background:rgba(0,0,0,0.025);border:1px solid rgba(0,0,0,0.08);border-radius:10px;margin-bottom:6px;"><b>① 侨批数据治理（kb_build.py / kb_retriever.py）</b><br/>长标题→短实体名 name_short（58/77 条干净提取），如「林金珍致郑应武、陈金香、婶母侨批（1943-1964）」→「林金珍」；19 条叙事标题合理跳过。</div>
+    <div style="padding:8px 12px;background:rgba(0,0,0,0.025);border:1px solid rgba(0,0,0,0.08);border-radius:10px;margin-bottom:6px;"><b>② HNSW 漏召回修复（kb_build.py）</b><br/>根因：近似索引默认搜索宽度不足，n_results≤20 漏掉真正最近邻（同向量 n=30 rank1、n=20 无）。显式配置 construction_ef/search_ef=200 后 n=5~100 排名全稳定。</div>
+    <div style="padding:8px 12px;background:rgba(0,0,0,0.025);border:1px solid rgba(0,0,0,0.08);border-radius:10px;"><b>③ 评测集对齐真实问法（eval_rag.py）</b><br/>侨批自动评测改用 name_short 生成问题（686→648 条），提取不出的不生成测试对。</div>
+  </div>
+
+  <div style="font-size:11px;color:#6B7280;margin-top:12px;line-height:1.6;">剩余 23 条失败全部为 rank 2–5（已召回、未进首条），无未召回；属多实体混淆/句式敏感残余，与查询改写（C 类）一并列为后续项，不影响当前结论。</div>
+</div>
+</html>
